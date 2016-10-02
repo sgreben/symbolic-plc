@@ -1,5 +1,6 @@
 ﻿namespace FsPlcCompiler.Stage0
 
+/// Type and value environments built from the AST
 module Scope = 
     open FsPlcModel
     open Declarations
@@ -7,30 +8,36 @@ module Scope =
     
     type Unit_scope = Map<Common.Identifier, Declaration>
     
+    /// A POU type environment
     type Pou_scope = 
         { vars : Unit_scope
           vars_list : Declaration list
           vars_in : Declaration list
           ast : Pous.PouAst }
     
+    /// Module value environment
     type Module_values_scope = 
         { gvl : Map<Common.Identifier, Unit_scope>
           pouInstance : Map<Common.Identifier, Common.Qualified_identifier> }
     
+    /// Module type environment
     type Module_types_scope = 
         { simple : Map<Common.Identifier, Projects.Data_type>
           pouFunctionBlock : Map<Common.Identifier, Pou_scope>
           pouProgram : Map<Common.Identifier, Pou_scope>
           pouFunction : Map<Common.Identifier, Pou_scope> }
     
+    /// Project type environment
     type Project_types_scope = 
         { library : Map<Common.Identifier, Module_types_scope>
           user : Module_types_scope }
     
+    /// Project value environment
     type Project_values_scope = 
         { library : Map<Common.Identifier, Module_values_scope>
           user : Module_values_scope }
     
+    /// Project type and value environments
     type Project_scope = 
         { values : Project_values_scope
           types : Project_types_scope }
@@ -57,6 +64,7 @@ module Scope =
         { values = project_values_scope_empty
           types = project_types_scope_empty }
     
+    /// Construction of project type and value environments
     module Build = 
         open FsPlcModel
         open Declarations

@@ -216,6 +216,6 @@ module Resolve =
                 loop (AstDirect id) |> field_access id'
             | AstDot(v, id) -> loop v |> field_access id
         /// FIXME: resolve array accesses
-        //| AstIndex(v, idx) -> loop v |> index_access idx
+            | AstIndex(v, idx) -> loop v |> index_access idx
         loop v
         

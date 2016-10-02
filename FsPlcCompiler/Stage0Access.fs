@@ -1,5 +1,6 @@
 ﻿namespace FsPlcCompiler.Stage0
 
+/// Value and type access paths
 module Access =
     open FsPlcModel
 
@@ -62,6 +63,7 @@ module Access =
         | Index of int
         /// Access an array at the index given by the value of a variable
         | IndexVar of Value_path
+        | IndexAst of StExpressions.IndexAst
     
     /// Fully-qualified GVL variable path
     and Gvl_var_path = Access_project * Access_module_gvl_var
