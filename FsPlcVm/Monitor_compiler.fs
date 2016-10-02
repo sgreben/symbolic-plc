@@ -45,29 +45,6 @@ module Monitor_compiler =
     
     type Constraint = Atom list
     
-    type Diagram = 
-        { t_start : int
-          t_end : int
-          time_constraints : (int * int * Time_constraint_spec) list
-          value_constraints : (int * int * Value_constraint list) list }
-    
-    let rec to_diagram t C = 
-        function 
-        | Empty -> 
-            { t_start = t
-              t_end = t
-              time_constraints = []
-              value_constraints = [ (t, t, C) ] }
-        | Constraint(phi, A) -> to_diagram t (phi :: C) A
-        | Within(Time_le x, A) -> 
-            let t0 = t
-            let d = to_diagram t0 [] A
-            let t1 = d.t_end + 1
-            { t_start = t0
-              t_end = t1
-              time_constraints = (t0, t1, Time_le x) :: d.time_constraints
-              value_constraints = (t0, t1, C) :: d.value_constraints }
-    
     type Fta_instruction = 
         | ASSUME of Constraint
         | ASSERT of Constraint
@@ -264,6 +241,8 @@ module Monitor_compiler =
         | JMP_STATE of State
         | JMP_STATE_NONDET of State
     
+    exception Only_basic_values_are_supported_in_constraints
+
     let compile_constraint m = 
         function 
         | Time_constraint(Diff_le(t, x)) -> 
@@ -292,6 +271,7 @@ module Monitor_compiler =
                 match b with
                 | Reference r -> CMPOP_REF(op, r)
                 | Value(VBasic v) -> CMPOP_IMM(op, v)
+                | Value _ -> raise Only_basic_values_are_supported_in_constraints
             
             [ load_a; compare_to_b ]
     

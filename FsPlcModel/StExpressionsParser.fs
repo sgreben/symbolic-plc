@@ -13,7 +13,10 @@ module StExpressionsParser =
             choice [ dot >>. ident >>= fun i -> variable' (AstDot(v, i))
                      brackets index >>= fun idx -> variable' (AstIndex(v, idx))
                      preturn v ]
-        ident .>> ws |>> AstDirect >>= variable' .>> notFollowedBy (pstring "#") <!> "variable"
+        ident .>> ws |>> AstDirect
+        >>= variable'
+        .>> notFollowedBy (pstring "#")
+        <!> "variable"
     
     let expression, expressionRef = createParserForwardedToRef<ExpressionAst, unit>()
     let named_input_param = ident .>> ws .>> skipString ":=" .>> ws .>>. expression
@@ -84,7 +87,7 @@ module StExpressionsParser =
     let expression_eof = 
         choice [ attempt (bexp .>> eof)
                  aexp .>> eof ]
-
+    
     let expression_semi = 
         choice [ attempt (bexp .>> semicolon)
                  aexp .>> semicolon ]

@@ -273,6 +273,7 @@ module TypeConversions =
     
         let to_bool = 
             function 
+            | Values.BOOL b -> Values.BOOL b
             | Values.REAL v -> Values.BOOL(v > (float) 0)
             | Values.UDINT v -> Values.BOOL(v > (uint32) 0)
             | Values.USINT v -> Values.BOOL(v > (uint8) 0)
@@ -288,7 +289,8 @@ module TypeConversions =
             | Values.SINT v -> Values.BOOL(v > (int8) 0)
     
         let to_type = 
-            function 
+            function
+            | Types.BOOL -> to_bool 
             | Types.REAL -> to_real
             | Types.UDINT -> to_udint
             | Types.USINT -> to_usint

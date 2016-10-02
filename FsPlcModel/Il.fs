@@ -23,8 +23,9 @@ module IL =
         | R1_RS
         | S1_SR
     type Nullop = 
-        /// Set current result equal to current time
+        /// Set current result equal to current time, create a fresh timestamp
         | LD_CURRENT_TIME
+        /// Set current result equal to current time, create a fresh timestamp
         | LD_CURRENT_TIME_NOCHANGE
         | NOT
         | NEG

@@ -1,4 +1,4 @@
-﻿    namespace FsPlcModel
+﻿namespace FsPlcModel
 
 module PousParser = 
     open Common.Parsers

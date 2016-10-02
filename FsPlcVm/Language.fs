@@ -33,7 +33,7 @@ module Language =
         | READ_INPUT of Basic_type*Memory_address
         | WRITE_OUTPUT of Memory_address
 
-    /// A low-level-IL (LLIL) operator
+    /// Low-level-IL (LLIL) operators
     type Operator = 
         | NULLOP of Nullop
         /// CR := (value)

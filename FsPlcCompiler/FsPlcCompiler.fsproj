@@ -75,6 +75,7 @@
     <Compile Include="Stage0Lookup.fs" />
     <Compile Include="Stage0Resolve.fs" />
     <Compile Include="Stage0Language.fs" />
+    <Compile Include="Stage0Project.fs" />
     <Compile Include="Stage0.fs" />
     <Compile Include="Stage1.fs" />
     <Compile Include="Stage2.fs" />
