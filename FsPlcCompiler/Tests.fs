@@ -57,6 +57,7 @@ module Test_data =
     
     open StExpressions
     open StStatements
+    
     let fun_myadd = 
         { name = "MY_ADD"
           typ = FUNCTION
@@ -65,9 +66,12 @@ module Test_data =
           iface = 
               Some { returnType = Some(Types.BASIC Types.LINT)
                      vars = [ VAR_INPUT_X_LINT; VAR_INPUT_Y_LINT ] }
-          bodies = [AstST([
-            {line=0L;column=0L},AstAssignment(AstDirect "MY_ADD",AstBinop(Add,AstVariable(AstDirect  "X"),AstVariable(AstDirect "Y")))
-          ])] }
+          bodies = 
+              [ AstST
+                    ([ { line = 0L
+                         column = 0L }, 
+                       AstAssignment
+                           (AstDirect "MY_ADD", AstBinop(Add, AstVariable(AstDirect "X"), AstVariable(AstDirect "Y"))) ]) ] }
     
     let fun_mycounter = 
         { name = "MY_COUNTER"
@@ -121,38 +125,48 @@ module Test_data =
     let tiny_pou_interface = 
         { returnType = None
           vars = [ VAR_MyVar_LINT; VAR_MyCounter_FB; VAR_MyFlipFlopFB ] }
+    
     open StExpressions
     open StStatements
+    
     let tiny_pou = 
         { dummy_pou with iface = Some tiny_pou_interface
                          bodies = 
                              [ AstST
-                                  (([ { line = 0L
-                                        column = 0L }, 
-                                      AstAssignment
-                                          (AstDirect "MyVar", 
-                                           AstBinop(Add, AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10))))
-                                      { line = 1L
-                                        column = 0L }, 
-                                      AstAssignment
-                                          (AstDirect "MyVar", 
-                                           AstFunction(AstDirect "MY_ADD", [AstAnonymous (AstVariable(AstDirect "MyVar")); AstAnonymous (AstLiteral(BASIC(INT 10)))]))    
-                                      { line = 2L
-                                        column = 0L }, 
-                                      AstIf
-                                          (AstCmp(Lt,AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10))),
-                                          [ { line = 0L
-                                              column = 0L }, 
-                                            AstAssignment
-                                                (AstDirect "MyVar", 
-                                                 AstBinop(Add, AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10))))],[])]))] }
-
-
+                                   (([ { line = 0L
+                                         column = 0L }, 
+                                       AstAssignment
+                                           (AstDirect "MyVar", 
+                                            AstBinop(Add, AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10))))
+                                       { line = 1L
+                                         column = 0L }, 
+                                       AstAssignment(AstDirect "MyVar", 
+                                                     AstFunction(AstDirect "MY_ADD", 
+                                                                 [ AstAnonymous(AstVariable(AstDirect "MyVar"))
+                                                                   AstAnonymous(AstLiteral(BASIC(INT 10))) ]))
+                                       
+                                       { line = 2L
+                                         column = 0L }, 
+                                       AstIf
+                                           (AstCmp(Lt, AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10))), 
+                                            [ { line = 0L
+                                                column = 0L }, 
+                                              AstAssignment
+                                                  (AstDirect "MyVar", 
+                                                   AstBinop
+                                                       (Add, AstVariable(AstDirect "MyVar"), AstLiteral(BASIC(INT 10)))) ], 
+                                            []) ])) ] }
     
     open Tasks
+    
     let tiny_resource = 
         { name = "DummyResource"
-          tasks = [{name="MainTask"; properties=[INTERVAL (Fixed 1UL);PRIORITY 0];pou=["MyPou",["DUMMY_POU"]]}]
+          tasks = 
+              [ { name = "MainTask"
+                  properties = 
+                      [ INTERVAL(Fixed 1UL)
+                        PRIORITY 0 ]
+                  pou = [ "MyPou", [ "DUMMY_POU" ] ] } ]
           pouInstances = [ "MyPou", [ "DUMMY_POU" ] ]
           vars = [] }
     
@@ -168,17 +182,17 @@ module Test_data =
           libraries = []
           configurations = [ tiny_configuration ] }
 
-module Tests =
+module Tests = 
     open NUnit
     open NUnit.Core
     open NUnit.Framework
     open FsCheck
     open FsCheck.NUnit
     open FsPlcModel.Projects
-
+    
     [<TestFixture>]
-    type Tests() =
+    type Tests() = 
         [<Test>]
-        member x.``Can compile tiny project`` () =
+        member x.``Can compile tiny project``() = 
             let compiled = Compile.compile_project Test_data.tiny_project
             printfn "%A" compiled

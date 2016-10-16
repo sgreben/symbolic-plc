@@ -43,6 +43,8 @@ module Compile =
         and compile_binop env = 
             function 
             | (Mul, e, e') -> 
+                let r1, env = ralloc env
+                let r2, env = ralloc env
                 let e = compile env e
                 let e' = compile env e'
                 e @ [ OP(ABINOP_PUSH MUL) ] @ e' @ [ OP POP ]

@@ -74,8 +74,13 @@ module SMT =
         let inline neq a b = ctx.MkDistinct(a,b)
 
     module Op = 
+        let inline as_arith (e:Expr) = match e with :? ArithExpr as e -> e
         let inline as_int (e:ArithExpr) = match e with :? IntExpr as e -> e
         let inline as_real (e:ArithExpr) = match e with :? RealExpr as e -> e
+        let inline max_int x y = ctx.MkITE(Rel.ge x y, x, y) |> as_arith |> as_int
+        let inline max_real x y = ctx.MkITE(Rel.ge x y, x, y) |> as_arith |> as_real
+        let inline min_int x y = ctx.MkITE(Rel.ge x y, y, x) |> as_arith |> as_int
+        let inline min_real x y = ctx.MkITE(Rel.ge x y, y, x) |> as_arith |> as_real
         let inline add x y = ctx.MkAdd(x,y)
         let inline add_int (x:IntExpr) (y:IntExpr) = add x y |> as_int
         let inline add_real (x:RealExpr) (y:RealExpr) = add x y |> as_real

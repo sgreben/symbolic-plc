@@ -32,6 +32,7 @@ module DeclarationsParser =
                  keyword "READ_WRITE" |>> fun _ -> READ_WRITE ]
     
     let attributes = sepBy attribute spaces1
+    
     /// Parse a single variable declaration "<identifier> : <type> [:= <value>]" of the given kind
     let declaration k a = 
         ident .>> ws .>> colon .>> ws >>= fun id -> 
@@ -39,7 +40,7 @@ module DeclarationsParser =
                      >>= (fun t -> ValuesParser.value t |>> (fun v -> t, Some v))
                      TypesParser.anyType .>> ws |>> (fun t -> t, None) ] .>>. attributes |>> (fun ((t, v), a') -> 
             { kind = k
-              attr = a@a'
+              attr = a @ a'
               id = id
               typ = t
               ivalue = v })
@@ -72,7 +73,7 @@ module DeclarationsParserTests =
                     id = "Modus"
                     attr = [ CONSTANT ]
                     typ = Types.BASIC Types.BOOL
-                    ivalue = Some(Values.BASIC (Values.BOOL false)) } ]
+                    ivalue = Some(Values.BASIC(Values.BOOL false)) } ]
             actual_equals_expected (parse input, expected)
         
         [<Test>]
@@ -84,7 +85,7 @@ module DeclarationsParserTests =
                     id = "Druck"
                     attr = []
                     typ = Types.BASIC Types.REAL
-                    ivalue = Some(Values.BASIC (Values.REAL 12.2)) } ]
+                    ivalue = Some(Values.BASIC(Values.REAL 12.2)) } ]
             actual_equals_expected (parse input, expected)
         
         [<Test>]
@@ -96,7 +97,7 @@ module DeclarationsParserTests =
                     id = "Druck"
                     attr = [ RETAIN ]
                     typ = Types.BASIC Types.REAL
-                    ivalue = Some(Values.BASIC (Values.REAL 12.2)) } ]
+                    ivalue = Some(Values.BASIC(Values.REAL 12.2)) } ]
             actual_equals_expected (parse input, expected)
         
         [<Test>]
@@ -112,7 +113,7 @@ module DeclarationsParserTests =
                     id = "Druck"
                     attr = [ RETAIN ]
                     typ = Types.BASIC Types.REAL
-                    ivalue = Some(Values.BASIC (Values.REAL 12.2)) }
+                    ivalue = Some(Values.BASIC(Values.REAL 12.2)) }
                   { kind = VAR_INPUT
                     id = "Pumpe"
                     attr = [ RETAIN ]
@@ -121,10 +122,10 @@ module DeclarationsParserTests =
                   { kind = VAR_INPUT
                     id = "Motor"
                     attr = [ RETAIN ]
-                    typ = Types.TYPE_REFERENCE ["MotorDaten"]
+                    typ = Types.TYPE_REFERENCE [ "MotorDaten" ]
                     ivalue = None } ]
             actual_equals_expected (parse input, expected)
-
+        
         [<Test>]
         member x.``VAR_INPUT RETAIN Druck : REAL := 12.2; Pumpe : BOOL F_EDGE; Motor:MotorDaten; END_VAR``() = 
             let input = """VAR_INPUT 
@@ -138,7 +139,7 @@ module DeclarationsParserTests =
                     id = "Druck"
                     attr = [ RETAIN ]
                     typ = Types.BASIC Types.REAL
-                    ivalue = Some(Values.BASIC (Values.REAL 12.2)) }
+                    ivalue = Some(Values.BASIC(Values.REAL 12.2)) }
                   { kind = VAR_INPUT
                     id = "Pumpe"
                     attr = [ RETAIN; F_EDGE ]
@@ -147,6 +148,6 @@ module DeclarationsParserTests =
                   { kind = VAR_INPUT
                     id = "Motor"
                     attr = [ RETAIN ]
-                    typ = Types.TYPE_REFERENCE ["MotorDaten"]
+                    typ = Types.TYPE_REFERENCE [ "MotorDaten" ]
                     ivalue = None } ]
             actual_equals_expected (parse input, expected)

@@ -41,6 +41,7 @@ module Access =
     type Generalized_type = 
         | Pou_type of Pou_type_path
         | Simple_type of Simple_type_path option * Types.Type
+        | Builtin_function_type of FsPlcModel.IL.Builtin
     
     //// VALUE PATHS
     ////

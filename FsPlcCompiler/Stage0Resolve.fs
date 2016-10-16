@@ -125,6 +125,7 @@ module Resolve =
     (* value scope resolution stack     Example
        (desc. precedence)
        ------------------------         ----------------
+       builtin                          ADD
        pou local vars                   My_PouInputVar
        module gvl (qualified)           My_GVL.My_Global_Var
        module gvl (unqualified)         My_Global_Var
@@ -134,6 +135,14 @@ module Resolve =
        library function (qualified)     Visu_Elems.LIBRARY_FUNCTION
        library gvl (unqualified)        GVL_Const.RED
        library function (unqualified)   LIBRARY_FUNCTION *)
+
+    let builtin_map = Map.ofList [ "ADD", IL.EXTOP IL.ADD_EXT
+                                   "MUL", IL.EXTOP IL.MUL_EXT
+                                   "MIN", IL.EXTOP IL.MIN
+                                   "MAX", IL.EXTOP IL.MAX ]
+    let builtin_function id = 
+        builtin_map.TryFind id |> Option.bind (fun builtin -> 
+            Some(Builtin_function_type builtin, Function(Builtin builtin)))
 
     // pou local vars
     let pou_local (prj_scope : Project_scope, pou_type_path : Pou_type_path) id = 
@@ -204,6 +213,7 @@ module Resolve =
             function 
             | AstDirect id -> 
                 pou_local (prj_scope, pou_type_path) id <|> fun () -> 
+                builtin_function id <|> fun () ->
                 module_gvl_unqualified prj_scope_focus id <|> fun () -> 
                 module_pou_instance prj_scope_focus id  <|> fun () -> 
                 module_function prj_scope_focus id <|> fun () -> 
@@ -216,6 +226,6 @@ module Resolve =
                 loop (AstDirect id) |> field_access id'
             | AstDot(v, id) -> loop v |> field_access id
         /// FIXME: resolve array accesses
-            | AstIndex(v, idx) -> loop v |> index_access idx
+            //| AstIndex(v, idx) -> loop v |> index_access idx
         loop v
         

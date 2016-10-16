@@ -72,6 +72,8 @@ module Language =
         | JMP_REF of Memory_address * Code_pointer (* offset *)
         /// NONDET JMP (pc)
         | NONDET of Code_pointer
+        /// CR (op) AUX[i]
+        | ABINOP_AUX of Arith_binop * Register
         /// CR (op) (value)
         | ABINOP_IMM of Arith_binop * Basic_value
         /// CR (op) Mem[(addr)]

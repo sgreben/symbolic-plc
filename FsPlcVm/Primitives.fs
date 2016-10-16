@@ -131,6 +131,11 @@ module Primitives =
         match s.aux.[i] with
         | Value v -> v
         | _ -> raise Type_error
+
+    let inline aux_basic_value ri s = 
+        match aux_value ri s with
+        | VBasic v -> v
+        | _ -> raise Type_error
     
     let inline aux_code_ptr i s = 
         match aux_value i s with

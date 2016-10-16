@@ -26,6 +26,7 @@ module Instructions =
     
     exception Infeasible
     
+    /// Conditional modifier
     let inline mod_c f s = 
         match Vmp.cr_is_sat s, Vmp.not_cr_is_sat s with
         | Vms.Sat b, Vms.Sat b' -> S2G(f s, b, s, b')
@@ -38,6 +39,7 @@ module Instructions =
         | Vms.Valid, Vms.Unsat -> S1(f s)
         | Vms.Valid, Vms.Valid -> raise Soundness_bug
     
+    /// Conditional modifier (negated)
     let inline mod_cn f s = 
         match Vmp.not_cr_is_sat s, Vmp.cr_is_sat s with
         | Vms.Sat b, Vms.Sat b' -> S2G(s, b', f s, b)
@@ -50,10 +52,15 @@ module Instructions =
         | Vms.Valid, Vms.Unsat -> S1(f s)
         | Vms.Valid, Vms.Valid -> raise Soundness_bug
     
+    /// Nullary instructions
     module Nullop = 
+        /// Bitwise complement
         let inline _not s = Vmp.set_cr_value_basic (Vmp.cr_value_basic s |> Vms.complement) s
+        
+        /// Logical negation
         let inline neg s = _not s
         
+        /// Load current symbolic timestamp and set fresh timestamp
         let inline ld_current_time s = 
             let fresh_id = sprintf "time_%d" (Vmp.ic s)
             let fresh_time = SMT.Var.mk_int fresh_id
@@ -302,6 +309,7 @@ module Instructions =
             
             let inline step_ref r op s = step (Vmp.read_basic_value r s) op s
             let inline step_push op = Vmp.push_op (ABINOP_POP op)
+            let inline step_aux ri op s = step (Vmp.aux_basic_value ri s) op s
         
         module Logicop = 
             let inline _prim f s = Vmp.set_cr_value_basic (Vmp.cr_value_basic s |> f) s
@@ -366,7 +374,51 @@ module Instructions =
                     vs
                     |> List.fold Vms.add (Vmp.cr_value_basic s)
                     |> fun v -> Vmp.set_cr_value_basic v s
-                
+
+                let inline mul vs s = 
+                    vs
+                    |> List.fold Vms.mul (Vmp.cr_value_basic s)
+                    |> fun v -> Vmp.set_cr_value_basic v s
+
+                let inline eq vs s =
+                    let cr = Vmp.cr_value_basic s
+                    vs
+                    |> List.fold (fun all_eq v -> Vms._and all_eq (Vms.eq v cr)) (BOOL true)
+                    |> fun v -> Vmp.set_cr_value_basic v s
+
+                let inline ge vs s =
+                    let cr = Vmp.cr_value_basic s
+                    vs
+                    |> List.fold (fun (all_geq, last) v -> (Vms._and all_geq (Vms.ge last v), v)) (BOOL true, cr)
+                    |> fun (v, _) -> Vmp.set_cr_value_basic v s
+
+                let inline gt vs s =
+                    let cr = Vmp.cr_value_basic s
+                    vs
+                    |> List.fold (fun (all_gt, last) v -> (Vms._and all_gt (Vms.gt last v), v)) (BOOL true, cr)
+                    |> fun (v, _) -> Vmp.set_cr_value_basic v s
+
+                let inline le vs s =
+                    let cr = Vmp.cr_value_basic s
+                    vs
+                    |> List.fold (fun (all_le, last) v -> (Vms._and all_le (Vms.le last v), v)) (BOOL true, cr)
+                    |> fun (v, _) -> Vmp.set_cr_value_basic v s
+
+                let inline lt vs s =
+                    let cr = Vmp.cr_value_basic s
+                    vs
+                    |> List.fold (fun (all_lt, last) v -> (Vms._and all_lt (Vms.lt last v), v)) (BOOL true, cr)
+                    |> fun (v, _) -> Vmp.set_cr_value_basic v s
+
+                let inline max vs s =
+                    vs
+                    |> List.fold Vms.Builtin.Extop.max (Vmp.cr_value_basic s)
+                    |> fun v -> Vmp.set_cr_value_basic v s
+                let inline min vs s =
+                    vs
+                    |> List.fold Vms.Builtin.Extop.min (Vmp.cr_value_basic s)
+                    |> fun v -> Vmp.set_cr_value_basic v s
+
                 let inline values vs s = 
                     vs |> List.map (function 
                               | Value(VBasic v) -> v
@@ -379,7 +431,14 @@ module Instructions =
                     let vs = values vs s
                     match op with
                     | ADD_EXT -> add vs s
-                    | _ -> raise Not_supported
+                    | MUL_EXT -> mul vs s
+                    | EQ_EXT -> eq vs s
+                    | GE_EXT -> ge vs s
+                    | GT_EXT -> gt vs s
+                    | LE_EXT -> le vs s
+                    | LT_EXT -> lt vs s
+                    | MAX -> max vs s
+                    | MIN -> min vs s
     
     module Retop = 
         let inline ret s = Vmp.ret s
@@ -482,6 +541,7 @@ module Instructions =
         | ABINOP_REF(op, r) -> S1(Aluop.Arithop.step_ref r op s)
         | ABINOP_IMM(op, v) -> S1(Aluop.Arithop.step v op s)
         | ABINOP_PUSH op -> S1(Aluop.Arithop.step_push op s)
+        | ABINOP_AUX(op, ri) -> S1(Aluop.Arithop.step_aux ri op s)
         | LBINOP_REF(op, r) -> S1(Aluop.Logicop.step_ref r op s)
         | LBINOP_IMM(op, v) -> S1(Aluop.Logicop.step (BOOL v) op s)
         | LBINOP_PUSH op -> S1(Aluop.Logicop.step_push op s)

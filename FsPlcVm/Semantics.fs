@@ -240,14 +240,38 @@ module Semantics =
             let acos = dummy_int
             let atan = dummy_int
         module Extop =
-            let add _ _ = dummy_int
-            let mul _ _ = dummy_int
             let mux _ _ = dummy_int
-            let min _ _ = dummy_int
-            let max _ _ = dummy_int
-            let gt _ _ =  dummy_bool
-            let lt _ _ =  dummy_bool
-            let ge _ _ =  dummy_bool
-            let le _ _ =  dummy_bool
-            let eq _ _ =  dummy_bool
-            let neq _ _ = dummy_bool
+            let min_sym x y = 
+                match x, y with 
+                | SYM_BOOL x, SYM_BOOL y -> SYM_BOOL (Symrel._or x y)
+                | SYM_INT x, SYM_INT y -> SYM_INT(Symop.min_int x y)
+                | SYM_UINT x, SYM_UINT y -> SYM_UINT(Symop.min_int x y)
+                | SYM_REAL x, SYM_REAL y -> SYM_REAL(Symop.min_real x y)
+                | _ -> raise Value_type_error
+            let min x y =   
+                match x,y with
+                | INT x, INT y -> INT (if x >= y then x else y)
+                | UINT x, UINT y -> UINT (if x >= y then x else y)
+                | REAL x, REAL y -> REAL (if x >= y then x else y)
+                | BOOL x, BOOL y -> BOOL (if x >= y then x else y)
+                | SYM x, SYM y -> SYM (min_sym x y)
+                | SYM x , y -> SYM (min_sym x  (to_sym y))
+                | x, SYM y -> SYM (min_sym (to_sym x) y)
+                | _ -> raise Value_type_error
+            let max_sym x y = 
+                match x, y with 
+                | SYM_BOOL x, SYM_BOOL y -> SYM_BOOL (Symrel._or x y)
+                | SYM_INT x, SYM_INT y -> SYM_INT(Symop.max_int x y)
+                | SYM_UINT x, SYM_UINT y -> SYM_UINT(Symop.max_int x y)
+                | SYM_REAL x, SYM_REAL y -> SYM_REAL(Symop.max_real x y)
+                | _ -> raise Value_type_error
+            let max x y =   
+                match x,y with
+                | INT x, INT y -> INT (if x >= y then x else y)
+                | UINT x, UINT y -> UINT (if x >= y then x else y)
+                | REAL x, REAL y -> REAL (if x >= y then x else y)
+                | BOOL x, BOOL y -> BOOL (if x >= y then x else y)
+                | SYM x, SYM y -> SYM (max_sym x y)
+                | SYM x , y -> SYM (max_sym x  (to_sym y))
+                | x, SYM y -> SYM (max_sym (to_sym x) y)
+                | _ -> raise Value_type_error

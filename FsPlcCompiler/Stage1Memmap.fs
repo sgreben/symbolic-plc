@@ -204,7 +204,7 @@ module Memmap =
                 let offset, mem = alloc mem
                 let mem = set_mem offset (Value(VBasic(INT 0L))) mem
                 offset, mem
-            | Types.BASIC Types.UINT -> 
+            | Types.BASIC Types.UINT | Types.BASIC Types.BYTE -> 
                 let offset, mem = alloc mem
                 let mem = set_mem offset (Value(VBasic(UINT 0UL))) mem
                 offset, mem

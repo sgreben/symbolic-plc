@@ -1,6 +1,6 @@
 ﻿namespace FsPlcCompiler.Stage0
 
-/// Type and value environments built from the AST
+/// Representation and construction of type and value environments from a project AST
 module Scope = 
     open FsPlcModel
     open Declarations
