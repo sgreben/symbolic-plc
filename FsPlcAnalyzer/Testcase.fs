@@ -3,6 +3,7 @@
 open Analysis
 open FsPlcVm
 open Representation
+open SMT
 
 module Testcase = 
     type Env = 
@@ -39,7 +40,7 @@ module Testcase =
     
     type Constraint_step = 
         { step_index : int
-          expr : BoolExpr }
+          expr : Symbolic_bool }
     
     type Testcase = 
         { system : Testcase_step array
@@ -143,7 +144,7 @@ module Testcase =
                                | SYM(SYM_UINT v) -> mdl.Eval(v)
                                | SYM(SYM_INT v) -> mdl.Eval(v)
                                | SYM(SYM_BOOL v) -> mdl.Eval(v)
-                               | INT i -> SMT.Const.mk_int i :> Expr
+                               | INT i -> SMT.Const.mk_int i :> Microsoft.Z3.Expr
                            t.cycles.[i].step_index, mdl.Eval(t.system.[t.cycles.[i].step_index].time), v)
                 
                 let cycle = sprintf "(cycle=%d) %A" i mdl

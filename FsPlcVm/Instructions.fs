@@ -428,8 +428,7 @@ module Instructions =
                     |> fun v -> Vmp.set_cr_value_basic v s
 
                 let inline mux vs s = 
-                    match vs with
-                    | k::vs -> Vmp.set_cr_value_basic (Vms.Builtin.Extop.mux k vs) s
+                    Vmp.set_cr_value_basic (Vms.Builtin.Extop.mux (Vmp.cr_value_basic s) vs) s
 
                 let inline values vs s = 
                     vs 
@@ -438,8 +437,6 @@ module Instructions =
                         | Value(VBasic v) -> v
                         | Reference r -> Vmp.read_basic_value r s
                         | _ -> raise Vmp.Type_error)
-                
-                exception Not_supported
                 
                 let inline step op vs s = 
                     let vs = values vs s

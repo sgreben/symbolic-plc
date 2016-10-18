@@ -45,7 +45,7 @@ module StExpressionsParser =
     let aexpOpp = new OperatorPrecedenceParser<ExpressionAst, unit, unit>()
     let aexp = aexpOpp.ExpressionParser <!> "aexp"
     
-    do indexRef := sepBy1 aexp (comma >>. ws) |>> fun (x :: xs) -> (x, xs)
+    do indexRef := sepBy1 aexp (comma >>. ws) |>> fun xs -> (xs.Head, xs.Tail)
     aexpOpp.TermParser <- choice [ atom <!> "aexp.atom"
                                    parens aexp <!> "aexp.parens" ]
     aexpOpp.AddOperator(InfixOperator("-", ws, 6, Associativity.Left, fun x y -> AstBinop(Sub, x, y)))

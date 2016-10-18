@@ -1,4 +1,5 @@
-﻿namespace FsPlcVm
+﻿namespace FsPlcAnalyzer
+open FsPlcVm
 
 module IL = FsPlcModel.IL
 

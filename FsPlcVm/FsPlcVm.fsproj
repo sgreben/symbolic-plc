@@ -79,7 +79,6 @@
     <Compile Include="Primitives.fs" />
     <Compile Include="Instructions.fs" />
     <Compile Include="Runtime.fs" />
-    <Compile Include="Tests.fs" />
     <Content Include="packages.config" />
     <Content Include="app.config" />
     <None Include="libz3.dll">
@@ -104,10 +103,6 @@
       <HintPath>..\..\..\..\..\..\..\z3-4.4.0-x64-win\bin\Microsoft.Z3.dll</HintPath>
     </Reference>
     <Reference Include="mscorlib" />
-    <Reference Include="nunit.framework">
-      <HintPath>..\packages\NUnit.3.5.0\lib\net45\nunit.framework.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Numerics" />

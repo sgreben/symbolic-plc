@@ -32,7 +32,7 @@ module Memmap =
             let offset, mem = alloc mem
             let mem = set_mem offset (Value(VBasic(INT 0L))) mem
             offset, mem
-        | Types.BASIC Types.UINT -> 
+        | Types.BASIC Types.UINT | Types.BASIC Types.BYTE -> 
             let offset, mem = alloc mem
             let mem = set_mem offset (Value(VBasic(UINT 0UL))) mem
             offset, mem
@@ -186,13 +186,11 @@ module Memmap =
     
     and allocate_value (types_memmap : Project_types_memmap) (scope : Scope.Project_scope) mem = 
         function 
+        | Builtin_function_type _ -> 0, mem
         | Pou_type t -> 
             let ast = Stage0.Lookup.project_pou_ast scope.types t |> Option.get
             match ast.typ with
-            | FsPlcModel.Pous.FUNCTION -> 
-                let offset, mem = alloc mem
-                let mem = set_mem offset (Reference 0) mem
-                offset, mem
+            | FsPlcModel.Pous.FUNCTION -> 0, mem
             | _ -> allocate_pou types_memmap scope mem t
         | Simple_type(_, t) -> 
             match t with
@@ -277,7 +275,7 @@ module Memmap =
     let project_memmap (p : Scope.Project_scope) = 
         let mem = 
             { memory = Map.empty
-              offset = 0 }
+              offset = 1 }
         
         let types, mem = project_types_memmap p mem p.types
         let values, mem = project_values_memmap types p mem p.values
@@ -296,8 +294,7 @@ module Memmap =
     
     let fun_arg_anon scope i = 
         function 
-        | (User, id) -> 
-            scope.types.user.fun_memory.[id].var_memory.[scope.types.user.fun_memory.[id].vars_in.[i]]
+        | (User, id) -> scope.types.user.fun_memory.[id].var_memory.[scope.types.user.fun_memory.[id].vars_in.[i]]
         | (Library lib, id) -> 
             scope.types.user.fun_memory.[id].var_memory.[scope.types.library.[lib].fun_memory.[id].vars_in.[i]]
     
@@ -320,10 +317,14 @@ module Memmap =
     let struct_field_idx scope fid = function 
         | Types.STRUCT s -> List.findIndex (fun (id, _) -> id = fid) s
     
+    exception Not_implemented
+    let builtin_field_idx scope fid f = raise Not_implemented
+
     let field_idx scope fid = 
         function 
         | Pou_type pt -> pou_field_idx scope fid pt
         | Simple_type(_, t) -> struct_field_idx scope fid t
+        | Builtin_function_type f -> builtin_field_idx scope fid f
     
     let var_global scope = 
         function 

@@ -2,7 +2,7 @@
 
 module SMT =
     open Microsoft.Z3
-    let Z3ContextOptions = System.Collections.Generic.Dictionary<string, string>()
+    let private Z3ContextOptions = System.Collections.Generic.Dictionary<string, string>()
     let ctx = new Context(Z3ContextOptions)
     let solver = ctx.MkSolver()
 
@@ -74,9 +74,10 @@ module SMT =
         let inline neq a b = ctx.MkDistinct(a,b)
 
     module Op = 
-        let inline as_arith (e:Expr) = match e with :? ArithExpr as e -> e
-        let inline as_int (e:ArithExpr) = match e with :? IntExpr as e -> e
-        let inline as_real (e:ArithExpr) = match e with :? RealExpr as e -> e
+        exception Type_error
+        let inline as_arith (e:Expr) = match e with :? ArithExpr as e -> e | _ -> raise Type_error
+        let inline as_int (e:ArithExpr) = match e with :? IntExpr as e -> e | _ -> raise Type_error
+        let inline as_real (e:ArithExpr) = match e with :? RealExpr as e -> e | _ -> raise Type_error
         let inline ite i t e = ctx.MkITE(i, t, e)
         let inline max_int x y = ctx.MkITE(Rel.ge x y, x, y) |> as_arith |> as_int
         let inline max_real x y = ctx.MkITE(Rel.ge x y, x, y) |> as_arith |> as_real

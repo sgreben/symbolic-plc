@@ -14,7 +14,9 @@ module TasksParserXml =
     let taskPouInstance (xml : XElement) = 
         if (xml.Name.LocalName <> "pouInstance") then raise (Expected_task_pou_instance xml)
         let name = Common.Parsers.parse Common.Parsers.ident (xml.Attribute(xn "name").Value)
-        let typ =  Common.Parsers.parse Common.Parsers.qident (xml.Attribute(xn "typeName").Value)
+        let typ = 
+            try Common.Parsers.parse Common.Parsers.qident (xml.Attribute(xn "typeName").Value)
+            with _ -> [ name ]
         name,typ
     
     let taskProperty (xa : XAttribute) = 
