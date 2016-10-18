@@ -1,4 +1,5 @@
-﻿namespace FsPlcModel
+﻿namespace FsPlcParser
+open FsPlcModel
 
 module DeclarationsParserXml = 
     open Common.ParsersXml
@@ -82,9 +83,7 @@ module DeclarationsParserXml =
     let parse = Common.ParsersXml.parse
 
 module DeclarationsParserXmlTests = 
-    open FsUnit
     open NUnit
-    open NUnit.Core
     open NUnit.Framework
     open Declarations
     

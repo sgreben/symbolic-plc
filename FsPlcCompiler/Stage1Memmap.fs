@@ -286,19 +286,19 @@ module Memmap =
     
     let fun_vars_struct scope = 
         function 
-        | Project_function(User, id) -> scope.types.user.fun_memory.[id].vars_struct
-        | Project_function(Library lib, id) -> scope.types.library.[lib].fun_memory.[id].vars_struct
+        | (User, id) -> scope.types.user.fun_memory.[id].vars_struct
+        | (Library lib, id) -> scope.types.library.[lib].fun_memory.[id].vars_struct
     
     let fun_arg_named scope fid = 
         function 
-        | Project_function(User, id) -> scope.types.user.fun_memory.[id].var_memory.[fid]
-        | Project_function(Library lib, id) -> scope.types.library.[lib].fun_memory.[id].var_memory.[fid]
+        | (User, id) -> scope.types.user.fun_memory.[id].var_memory.[fid]
+        | (Library lib, id) -> scope.types.library.[lib].fun_memory.[id].var_memory.[fid]
     
     let fun_arg_anon scope i = 
         function 
-        | Project_function(User, id) -> 
+        | (User, id) -> 
             scope.types.user.fun_memory.[id].var_memory.[scope.types.user.fun_memory.[id].vars_in.[i]]
-        | Project_function(Library lib, id) -> 
+        | (Library lib, id) -> 
             scope.types.user.fun_memory.[id].var_memory.[scope.types.library.[lib].fun_memory.[id].vars_in.[i]]
     
     let fun_ret scope = 

@@ -136,10 +136,42 @@ module Resolve =
        library gvl (unqualified)        GVL_Const.RED
        library function (unqualified)   LIBRARY_FUNCTION *)
 
-    let builtin_map = Map.ofList [ "ADD", IL.EXTOP IL.ADD_EXT
-                                   "MUL", IL.EXTOP IL.MUL_EXT
-                                   "MIN", IL.EXTOP IL.MIN
-                                   "MAX", IL.EXTOP IL.MAX ]
+    let builtin_map = Map.ofList [  "ADD", IL.EXTOP IL.ADD_EXT
+                                    "MUL", IL.EXTOP IL.MUL_EXT
+                                    "MUX", IL.EXTOP IL.MUX
+                                    "MIN", IL.EXTOP IL.MIN
+                                    "MAX", IL.EXTOP IL.MAX
+                                    "GT", IL.EXTOP IL.GT_EXT
+                                    "GE", IL.EXTOP IL.GE_EXT
+                                    "EQ", IL.EXTOP IL.EQ_EXT
+                                    "LE", IL.EXTOP IL.LE_EXT
+                                    "LT", IL.EXTOP IL.LT_EXT
+                                    "TRUNC", IL.UNOP IL.TRUNC
+                                    "ABS", IL.UNOP IL.ABS
+                                    "SQRT", IL.UNOP IL.SQRT
+                                    "LN", IL.UNOP IL.LN
+                                    "LOG", IL.UNOP IL.LOG
+                                    "EXP", IL.UNOP IL.EXP
+                                    "SIN", IL.UNOP IL.SIN
+                                    "COS", IL.UNOP IL.COS
+                                    "TAN", IL.UNOP IL.TAN
+                                    "ASIN", IL.UNOP IL.ASIN
+                                    "ACOS", IL.UNOP IL.ACOS
+                                    "ATAN", IL.UNOP IL.ATAN 
+                                    "SUB", IL.BINOP IL.SUB_BIN
+                                    "DIV", IL.BINOP IL.DIV_BIN
+                                    "MOD", IL.BINOP IL.MOD_BIN
+                                    "EXPT", IL.BINOP IL.EXPT
+                                    "MOVE", IL.BINOP IL.MOVE
+                                    "SHL", IL.BINOP IL.SHL
+                                    "SHR", IL.BINOP IL.SHR
+                                    "ROR", IL.BINOP IL.ROR
+                                    "ROL", IL.BINOP IL.ROL
+                                    "AND", IL.BINOP IL.AND_BIN
+                                    "OR", IL.BINOP IL.OR_BIN
+                                    "XOR", IL.BINOP IL.XOR_BIN 
+                                    "SEL", IL.TERNOP IL.SEL
+                                    "LIMIT", IL.TERNOP IL.LIMIT ]
     let builtin_function id = 
         builtin_map.TryFind id |> Option.bind (fun builtin -> 
             Some(Builtin_function_type builtin, Function(Builtin builtin)))
@@ -212,8 +244,8 @@ module Resolve =
         let rec loop = 
             function 
             | AstDirect id -> 
-                pou_local (prj_scope, pou_type_path) id <|> fun () -> 
                 builtin_function id <|> fun () ->
+                pou_local (prj_scope, pou_type_path) id <|> fun () -> 
                 module_gvl_unqualified prj_scope_focus id <|> fun () -> 
                 module_pou_instance prj_scope_focus id  <|> fun () -> 
                 module_function prj_scope_focus id <|> fun () -> 

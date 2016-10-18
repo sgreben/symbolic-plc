@@ -124,7 +124,6 @@ module IL =
         | EQ_EXT
         | LE_EXT
         | LT_EXT
-        | NE_EXT
     type Builtin_binop =
         | SUB_BIN
         | DIV_BIN

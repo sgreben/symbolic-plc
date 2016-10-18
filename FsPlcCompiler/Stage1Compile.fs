@@ -30,6 +30,8 @@ module Compile =
         let rfree env = 
             match env.reg with
             | Reg i -> { env with reg = Reg(i - 1) }
+
+        exception Function_arity
         
         let rec compile_unop env = 
             function 
@@ -97,16 +99,59 @@ module Compile =
         
         and compile_function_call env (f, parms) = 
             match f with
-            | Builtin f -> []
-            | Project_function _ -> 
-                let var_struct = Memmap.fun_vars_struct env.map f
+            | Builtin(Builtin.UNOP f) -> 
+                match parms with
+                | [ Anonymous e ] -> 
+                    let e = compile env e
+                    e @ [ OP(FUN_BUILTIN_UNOP f) ]
+                | _ -> raise Function_arity
+            | Builtin(Builtin.BINOP f) -> 
+                match parms with
+                | [ Anonymous e; Anonymous e' ] -> 
+                    let e = compile env e
+                    let r1, env = ralloc env
+                    let e' = compile env e'
+                    let r2, env = ralloc env
+                    e @ [ OP(STOREOP_AUX(ST, r1)) ] @ e' @ [ OP(STOREOP_AUX(ST, r2))
+                                                             OP(MOV_CR_AUX r1)
+                                                             OP(FUN_BUILTIN_BINOP(f, r2)) ]
+                | _ -> raise Function_arity
+            | Builtin(Builtin.TERNOP f) -> 
+                match parms with
+                | [ Anonymous e; Anonymous e'; Anonymous e'' ] -> 
+                    let e = compile env e
+                    let r1, env = ralloc env
+                    let e' = compile env e'
+                    let r2, env = ralloc env
+                    let e'' = compile env e''
+                    let r3, env = ralloc env
+                    e 
+                    @ [ OP(STOREOP_AUX(ST, r1)) ] 
+                      @ e' @ [ OP(STOREOP_AUX(ST, r2)) ] @ e'' @ [ OP(STOREOP_AUX(ST, r3))
+                                                                   OP(MOV_CR_AUX r1)
+                                                                   OP(FUN_BUILTIN_TERNOP(f, r2, r3)) ]
+                | _ -> raise Function_arity
+            | Builtin(Builtin.EXTOP f) -> 
+                parms
+                |> List.fold (fun (rs, env, ops) (Anonymous e) -> 
+                       let r, env = ralloc env
+                       let e = compile env e
+                       (r :: rs, env, ops @ [ OP(STOREOP_AUX(ST, r)) ])) ([], env, [])
+                |> fun (rs, env, ops) -> 
+                    match rs with
+                    | [] -> [ OP(FUN_BUILTIN_EXTOP(f, [])) ]
+                    | last :: tail -> 
+                        ops @ [ OP(MOV_CR_AUX last)
+                                OP(FUN_BUILTIN_EXTOP(f, List.rev tail)) ]
+            | Project_function(ap, f) -> 
+                let var_struct = Memmap.fun_vars_struct env.map (ap, f)
                 
                 let _, env, assign_params = 
                     parms |> List.fold (fun (i, env, is) (Anonymous e) -> 
                                  let e = compile env e
-                                 let field = Memmap.fun_arg_anon env.map i f
+                                 let field = Memmap.fun_arg_anon env.map i (ap, f)
                                  (i + 1), env, is @ e @ [ OP(STOREOP_IMM(ST, field)) ]) (0, env, [])
-                assign_params @ [ SFUN(f, var_struct) ]
+                assign_params @ [ SFUN(Project_function(ap, f), var_struct) ]
         
         and compile_literal env = 
             function 
@@ -306,12 +351,12 @@ module Compile =
             let _, env = pop_loop_exit env
             List.concat [ init
                           delta
-                          [ OP (CMPOP_IMM(LT, INT 0L))
+                          [ OP(CMPOP_IMM(LT, INT 0L))
                             (SJMP(JMPC, decreasingLabel))
                             /// FOR (low) TO (high) DO (increment)
                             LABEL increasingLabel ]
                           v'
-                          [ OP (CMPOP_PUSH GT) ]
+                          [ OP(CMPOP_PUSH GT) ]
                           bound
                           [ OP POP
                             (SJMP(JMPC, exitLabel)) ]
@@ -321,7 +366,7 @@ module Compile =
                             /// FOR (high) TO (low) DO (decrement)
                             LABEL decreasingLabel ]
                           v'
-                          [ OP (CMPOP_PUSH LT) ]
+                          [ OP(CMPOP_PUSH LT) ]
                           bound
                           [ OP POP
                             (SJMP(JMPC, exitLabel)) ]
@@ -329,7 +374,7 @@ module Compile =
                           increment
                           [ (SJMP(JMP, decreasingLabel))
                             LABEL exitLabel ] ], env
-
+        
         and compile_structure_assignment env rhs_reg sa = 
             match sa with
             | [ Field(pt, f) ] -> 

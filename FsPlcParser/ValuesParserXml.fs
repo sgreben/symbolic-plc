@@ -1,4 +1,5 @@
-﻿namespace FsPlcModel
+﻿namespace FsPlcParser
+open FsPlcModel
 
 module ValuesParserXml = 
     open Common.ParsersXml

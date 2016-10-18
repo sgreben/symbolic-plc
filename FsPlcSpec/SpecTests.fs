@@ -1,11 +1,7 @@
 ﻿namespace FsPlcSpec
 
 module SpecTests = 
-    open NUnit
-    open NUnit.Core
     open NUnit.Framework
-    open FsCheck
-    open FsCheck.NUnit
     open Monitor_compiler
     open FsPlcModel.IL
     open FsPlcVm

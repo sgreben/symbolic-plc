@@ -97,11 +97,11 @@ module Language =
         // <BUILTIN>
         | FUN_BUILTIN_UNOP of Builtin_unop
         // <BUILTIN>(CR,<arg>)
-        | FUN_BUILTIN_BINOP of Builtin_binop *  Operand
+        | FUN_BUILTIN_BINOP of Builtin_binop *  Register
         // <BUILTIN>(CR,<arg>,<arg>)
-        | FUN_BUILTIN_TERNOP of Builtin_binop * Operand * Operand
+        | FUN_BUILTIN_TERNOP of Builtin_ternop * Register * Register
         // <BUILTIN>(CR,<arg>,...)
-        | FUN_BUILTIN_EXTOP of Builtin_extop * (Operand list)
+        | FUN_BUILTIN_EXTOP of Builtin_extop * (Register list)
         /// CALL (pc)
         | CALLOP_IMM of Call_operator * Code_pointer * Register
         /// CALL Mem[(addr)]

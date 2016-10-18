@@ -240,7 +240,11 @@ module Semantics =
             let acos = dummy_int
             let atan = dummy_int
         module Extop =
-            let mux _ _ = dummy_int
+            let mux k vs =
+                match k with
+                | INT x -> List.item ((int) x) vs
+                | UINT x -> List.item ((int) x) vs
+                | _ -> raise Value_type_error
             let min_sym x y = 
                 match x, y with 
                 | SYM_BOOL x, SYM_BOOL y -> SYM_BOOL (Symrel._or x y)

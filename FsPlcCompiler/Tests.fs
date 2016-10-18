@@ -184,10 +184,8 @@ module Test_data =
 
 module Tests = 
     open NUnit
-    open NUnit.Core
     open NUnit.Framework
     open FsCheck
-    open FsCheck.NUnit
     open FsPlcModel.Projects
     
     [<TestFixture>]

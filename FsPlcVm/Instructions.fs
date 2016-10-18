@@ -14,12 +14,19 @@ module Instructions =
     open Language
     
     type Successors = 
+        /// Two guarded successors
         | S2G of State * Symbolic_bool * State * Symbolic_bool
+        /// Two successors
         | S2 of State * State
+        /// One successor
         | S1 of State
+        /// One successor, passed
         | S1P of State
+        /// One successor, failed
         | S1F of State
+        /// One guarded successor
         | S1G of State * Symbolic_bool
+        /// No successors
         | S0
     
     exception Soundness_bug
@@ -414,16 +421,23 @@ module Instructions =
                     vs
                     |> List.fold Vms.Builtin.Extop.max (Vmp.cr_value_basic s)
                     |> fun v -> Vmp.set_cr_value_basic v s
+
                 let inline min vs s =
                     vs
                     |> List.fold Vms.Builtin.Extop.min (Vmp.cr_value_basic s)
                     |> fun v -> Vmp.set_cr_value_basic v s
 
+                let inline mux vs s = 
+                    match vs with
+                    | k::vs -> Vmp.set_cr_value_basic (Vms.Builtin.Extop.mux k vs) s
+
                 let inline values vs s = 
-                    vs |> List.map (function 
-                              | Value(VBasic v) -> v
-                              | Reference r -> Vmp.read_basic_value r s
-                              | _ -> raise Vmp.Type_error)
+                    vs 
+                    |> List.map (fun r -> Vmp.aux r s) 
+                    |> List.map (function 
+                        | Value(VBasic v) -> v
+                        | Reference r -> Vmp.read_basic_value r s
+                        | _ -> raise Vmp.Type_error)
                 
                 exception Not_supported
                 
@@ -439,6 +453,7 @@ module Instructions =
                     | LT_EXT -> lt vs s
                     | MAX -> max vs s
                     | MIN -> min vs s
+                    | MUX -> mux vs s
     
     module Retop = 
         let inline ret s = Vmp.ret s
@@ -494,10 +509,6 @@ module Instructions =
             | BEGIN_TASK(i, tid) -> S1(begin_task i tid s)
     
     module Monitorop = 
-        exception Not_supported
-        
-        exception Monitor_pass of State
-        
         let inline log_state s = 
             printfn "<<<MONITOR>>>%A" s
             s
