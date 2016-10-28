@@ -1,17 +1,17 @@
 ﻿namespace FsPlcSpec
 
-/// Finite timed automata, represented as assembly-like programs
+/// Finite-state timed automata, represented as assembly-like programs
 module Fta = 
+    
+    module IL = FsPlcModel.IL
+
     /// An automaton state
     type State = S of int
     
+    /// An automaton time variable
     type Variable = V of int
     
-    type Time_constraint = 
-        | Diff_lt of Variable * int
-        | Diff_le of Variable * int
-        | Diff_ge of Variable * int
-        | Diff_gt of Variable * int
+    type Time_constraint = (Variable * IL.Cmp_op * int)
     
     type Atom = 
         | Time_constraint of Time_constraint

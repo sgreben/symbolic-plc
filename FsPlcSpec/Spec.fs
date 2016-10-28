@@ -3,11 +3,12 @@
 /// Declarative temporal test case specifications
 module Spec = 
     open FsPlcVm.Representation
+    open FsPlcModel
     
     module IL = FsPlcModel.IL
     
-    /// A value constraint is a comparison between two data items (references or literals)
-    type Value_constraint = Cell * IL.Cmp_op * Cell
+    /// A value constraint is a regular ST expression
+    type Value_constraint = StExpressions.ExpressionAst
     
     /// A time constraint is either (<= t ms) or (>= t ms)
     type Time_constraint_spec = 

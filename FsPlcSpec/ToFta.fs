@@ -1,36 +1,37 @@
 ﻿namespace FsPlcSpec
 
 /// Compiles declarative specifications to finite timed automata (module Fta)
-module SpecCompiler =
+module ToFta =
     open Spec
     open Fta
+    module IL = FsPlcModel.IL
 
     type Compile_env = 
         { max_var : Variable
           max_state : State
           max_moment : int }
     
-    let fresh_state env = 
+    let private fresh_state env = 
         match env.max_state with
         | S i -> S(i + 1), { env with max_state = S(i + 1) }
     
-    let fresh_var env = 
+    let private fresh_var env = 
         match env.max_var with
         | V i -> V(i + 1), { env with max_var = V(i + 1) }
     
-    let next_moment env = env.max_moment, { env with max_moment = env.max_moment + 1 }
+    let private next_moment env = env.max_moment, { env with max_moment = env.max_moment + 1 }
     
-    let empty_env = 
-        { max_state = S 1
+    let private empty_env = 
+        { max_state = S 0
           max_var = V 0
           max_moment = 0 }
 
-    let tc_of_spec t = 
+    let private tc_of_spec t = 
         function 
-        | Time_le x -> Diff_le(t, x)
-        | Time_ge x -> Diff_ge(t, x)
+        | Time_le x -> (t, IL.LE, x)
+        | Time_ge x -> (t, IL.GE, x)
         
-    let rec compile' env on_finish C A = 
+    let rec private compile' env on_finish C A = 
         match A with
         | Pass -> 
             let s_i, env = fresh_state env
@@ -83,7 +84,7 @@ module SpecCompiler =
             let moment, env = next_moment env
             let A, env = compile' env s_f C A
             let t_phi = Time_constraint(tc_of_spec t (Time_le x))
-            let t_phi_not = Time_constraint(Diff_gt(t, x))
+            let t_phi_not = Time_constraint((t, IL.GT, x))
             { initial_state = s_i
               instructions = 
                   List.concat [ [ STATE s_i
@@ -111,7 +112,7 @@ module SpecCompiler =
             let moment, env = next_moment env
             let A, env = compile' env s_f C A
             let t_phi = Time_constraint(tc_of_spec t (Time_ge x))
-            let t_phi_not = Time_constraint(Diff_lt(t, x))
+            let t_phi_not = Time_constraint((t, IL.LT, x))
             { initial_state = s_i
               instructions = 
                   List.concat [ [ STATE s_i
@@ -158,7 +159,7 @@ module SpecCompiler =
             let s_f, env = fresh_state env
             let t, env = fresh_var env
             let t_phi = Time_constraint(tc_of_spec t (Time_ge x))
-            let t_phi_not = Time_constraint(Diff_lt(t, x))
+            let t_phi_not = Time_constraint((t, IL.LT ,x))
             let A, env = compile' env s_f (t_phi :: C) A
             let moment, env = next_moment env
             { initial_state = s_i
